@@ -1,0 +1,23 @@
+name: Approve and Execute
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Command to execute'
+        required: true
+        type: string
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    environment: job-production
+    steps:
+      - name: Approved
+        run: echo "Approval granted for command '${{ inputs.command }}'"
+
+  execute:
+    needs: approve
+    uses: ./.github/workflows/execute.yml
+    with:
+      command: ${{ inputs.command }}
