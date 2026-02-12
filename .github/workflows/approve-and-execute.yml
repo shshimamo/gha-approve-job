@@ -18,6 +18,11 @@ jobs:
 
   execute:
     needs: approve
-    uses: ./.github/workflows/execute.yml
-    with:
-      command: ${{ inputs.command }}
+    runs-on: ubuntu-latest
+    environment: job-production-execute
+    steps:
+      - name: Execute command
+        run: |
+          echo "=== Executing command ==="
+          echo "${{ inputs.command }}"
+          echo "=== Command completed ==="
