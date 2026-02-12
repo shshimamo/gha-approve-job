@@ -21,7 +21,9 @@ jobs:
 
           # workflow_call は呼び出し元と同じ run_id を共有するため、
           # gh run view で承認ワークフローの情報を取得できる
-          WORKFLOW_NAME=$(gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json workflowName --jq '.workflowName')
+          RUN_INFO=$(gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json workflowName,jobs)
+
+          WORKFLOW_NAME=$(echo "$RUN_INFO" | jq -r '.workflowName')
           echo "Workflow name: $WORKFLOW_NAME"
 
           EXPECTED_NAME="Approve and Execute"
@@ -34,7 +36,7 @@ jobs:
           # approve ジョブの conclusion を確認
           # ※ workflow_call は同一 run 内で実行されるため、run 全体の conclusion はまだ success にならない
           #   代わりに approve ジョブ単体の conclusion をチェックする
-          APPROVE_CONCLUSION=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq '.jobs[] | select(.name == "approve") | .conclusion')
+          APPROVE_CONCLUSION=$(echo "$RUN_INFO" | jq -r '.jobs[] | select(.name == "approve") | .conclusion')
           echo "Approve job conclusion: $APPROVE_CONCLUSION"
 
           if [ "$APPROVE_CONCLUSION" != "success" ]; then
